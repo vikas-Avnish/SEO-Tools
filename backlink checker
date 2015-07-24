@@ -1,0 +1,46 @@
+mheaders =  {'user-agent': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_2_1 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8C148 Safari/6533.18.5'}
+dheaders={'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36'}
+import requests
+import ssl
+import csv,codecs, cStringIO
+import re
+import time,random
+import webbrowser
+import sys
+from bs4 import BeautifulSoup as bs
+from urllib import urlencode
+srcfile="kalkibacklinks.csv"
+def strip(a):                                           
+   return  re.sub(r'\s+', ' ', a).lstrip().rstrip()
+with open('out.csv','a') as csvfile:
+        fieldnames = ['src','target','status']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+def getinfo(i):
+    j=requests.get(i,headers=dheaders)
+    j=bs(j.content)
+    try:
+        l=j.findAll("a",href=re.compile("www.kalkifashion.com|barcode"))
+        print len(l)
+        if len(l)>0:
+            try:
+                for m in l:
+                    print i,"  >> ",m.attrs['href'],strip(m.getText()),strip(m.parent.text)
+                    try:
+                        try:
+                            print m.attrs['rel']
+                        except:
+                            print "Dofollow possibly"
+                    except:
+                        print "could not fetch information"
+            except:
+                print "more"
+        else:
+            print "No links"
+    except:
+        print "do more"
+with open("kalkibacklinks.csv") as csvs:
+    reader=csv.DictReader(csvs)
+    index=[]
+    for s in reader:
+        index.append(s["Links"])
+        getinfo(s["Links"])
